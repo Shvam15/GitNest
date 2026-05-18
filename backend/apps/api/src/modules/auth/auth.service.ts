@@ -2,7 +2,7 @@ import { Injectable } from "@nestjs/common";
 import { UsersRepository } from "../users/users.repository";
 import bcrypt from "bcrypt"
 import { SignupDto } from "./dto/signup.dto";
-import { LoginDTO } from "./dto/login.dto";
+import { LoginDto } from "./dto/login.dto";
 import { ApiResponse } from "src/common/responses/api-response";
 import { JwtService } from "@nestjs/jwt";
 
@@ -31,26 +31,47 @@ export class AuthService {
         // add new user
         const newUser = await this.usersRepository.createUser(userDetails?.user_name, userDetails?.email, hashedPassword)
 
+        const payload = {
+            sub: newUser?.id,
+            email: newUser?.email,
+            username: newUser?.username
+        }
+
+        // generate jwt token
+        const accessToken = await this.jwtService.signAsync(payload)
+
         const { password, ...safeUser } = newUser
 
         // return new user
-        return new ApiResponse(true, 'User created successfully', safeUser)
+        return new ApiResponse(true, 'User created successfully', {
+            safeUser,
+            accessToken
+        })
     }
 
-    async login(userDetails: LoginDTO) {
+    async login(userDetails: LoginDto) {
 
         const user = await this.usersRepository.findByEmail(userDetails?.email)
         if (!user) {
             throw new Error('User not found')
         }
 
-        const accessToken = await this.jwtService.signAsync(userDetails?.email)
-
+        
         // compare password
         const isPasswordValid = await bcrypt.compare(userDetails?.password, user?.password)
         if (!isPasswordValid) {
             return new ApiResponse(false, 'Email or password is wrong', null);
         }
+
+        // create jwt payload
+        const payload = {
+            sub: user?.id,
+            email: user?.email,
+            username: user?.username
+        }
+
+        // generate jwt token
+        const accessToken = await this.jwtService.signAsync(payload)
 
         const { password, ...safeUser } = user
 
