@@ -1,0 +1,18 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: git_nest_db
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: git_nest
+      TZ: Asia/Kolkata  # Add this line
+      PGTZ: Asia/Kolkata  # Add this line
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
