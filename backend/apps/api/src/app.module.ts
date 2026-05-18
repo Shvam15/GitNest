@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { DatabaseModule } from './database/database.module';
-import { TestController } from './modules/test/test.controller';
+import { AuthModule } from './modules/auth/auth.module';
 
 @Module({
   imports: [
@@ -9,8 +9,8 @@ import { TestController } from './modules/test/test.controller';
       isGlobal: true,
       envFilePath: '../../.env',
     }),
-    DatabaseModule
+    DatabaseModule,
+    AuthModule,
   ],
-  controllers:[TestController]
 })
-export class AppModule {}
+export class AppModule { }

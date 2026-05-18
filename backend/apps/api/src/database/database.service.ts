@@ -17,11 +17,8 @@ export class DatabaseService {
 
     async onModuleInit() {
         try {
-            console.log("password", process.env.DB_PASSWORD)
             const client = await this.pool.connect();
-
             console.log('Database connected successfully');
-
             client.release();
         } catch (error) {
             console.error('Database connection failed:', error);
