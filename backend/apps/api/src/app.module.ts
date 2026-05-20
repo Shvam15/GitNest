@@ -4,6 +4,7 @@ import { DatabaseModule } from './database/database.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { UsersModule } from './modules/users/users.module';
 import { RepositoriesModule } from './modules/repositories/repositories.module';
+import { BranchesModule } from './modules/branches/branches.module';
 
 @Module({
   imports: [
@@ -14,7 +15,9 @@ import { RepositoriesModule } from './modules/repositories/repositories.module';
     DatabaseModule,
     AuthModule,
     UsersModule,
-    RepositoriesModule
+    RepositoriesModule,
+    BranchesModule,
+    CommitsModule
   ],
 })
 export class AppModule { }
