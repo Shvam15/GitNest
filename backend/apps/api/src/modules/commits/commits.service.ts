@@ -19,4 +19,15 @@ export class CommitsService {
         return new ApiResponse(true, 'Commit created successfully', newCommit)
     }
 
+    async getCommitHistory(user: any, query: any) {
+        const commitHistory = await this.commitsRepository.getCommitHistory(user, query)
+        if (!commitHistory) {
+            throw new Error('Failed to get commit history')
+        }
+
+        return new ApiResponse(true, 'Commit history fetched successfully', commitHistory)
+    }
+
+
+
 }

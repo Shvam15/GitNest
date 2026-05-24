@@ -5,6 +5,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import { UsersModule } from './modules/users/users.module';
 import { RepositoriesModule } from './modules/repositories/repositories.module';
 import { BranchesModule } from './modules/branches/branches.module';
+import { CommitsModule } from './modules/commits/commits.module';
 
 @Module({
   imports: [

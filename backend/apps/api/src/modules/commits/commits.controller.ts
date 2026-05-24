@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Post, Req } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Param, Post, Query, Req } from "@nestjs/common";
 import { UseGuards } from "@nestjs/common";
 import { JwtAuthGuard } from "../auth/guard/jwt-auth.guard";
 import { CurrentUser } from "src/common/decorators/current-user.decorator";
@@ -16,4 +16,8 @@ export class CommitsController {
         return this.commitService.createCommit(user, body);
     }
 
+    @Get('history')
+    async getCommitHistory(@CurrentUser() user: any, @Query() query: any) {
+        return this.commitService.getCommitHistory(user, query);
+    }
 }

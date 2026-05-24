@@ -1,13 +1,13 @@
 import { Injectable } from "@nestjs/common";
 import { DatabaseService } from "src/database/database.service";
 import { CreateRepositoryDto } from "./dto/create-repo.dto";
+import { createFileStorage } from "src/common/utils";
 
 @Injectable()
 export class RepositoriesRepository {
     constructor(
         private readonly databaseService: DatabaseService
     ) { }
-
 
     async createRepository(user: any, repoDetails: CreateRepositoryDto) {
         const { name, description, is_private } = repoDetails
@@ -36,8 +36,11 @@ export class RepositoriesRepository {
 
             const branch = await client.query(branchQuery, [repo?.id, 'main']);
 
-            await client.query('COMMIT');
+            // create file storage
 
+            await client.query('COMMIT');
+            await createFileStorage({ user, body: repo, type: 'repo' })
+            
             return {
                 ...repo,
                 defaultBranch: branch?.rows[0]

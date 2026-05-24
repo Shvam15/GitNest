@@ -1,4 +1,4 @@
-import {  IsNotEmpty, IsOptional, IsString } from "class-validator";
+import {  IsArray, IsNotEmpty, IsOptional, IsString } from "class-validator";
 
 export class CreateCommitDto {
     @IsString()
@@ -20,4 +20,12 @@ export class CreateCommitDto {
     @IsString()
     @IsOptional()
     message?: string
+
+    @IsString()
+    @IsOptional()
+    parentCommitId?: string
+
+    @IsArray()
+    @IsOptional()
+    files?: string[]
 }
