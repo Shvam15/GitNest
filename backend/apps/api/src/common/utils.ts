@@ -1,5 +1,7 @@
-import { join } from "path"
+import { dirname, join } from "path"
 import { mkdir, writeFile } from "fs/promises"
+import { readdir } from 'fs/promises';
+import { readFile, readFileSync } from "fs";
 
 interface CreateFileStorage {
     user: any
@@ -14,61 +16,155 @@ interface StoreSnapshots {
     type: 'repo' | 'commit'
 }
 
-export async function createFileStorage(createFileStorage: CreateFileStorage) {
+const STORAGE_ROOT = join(
+    process.cwd(),
+    "..",
+    "..",
+    "..",
+    "GitNestData"
+);
+
+export async function createFileStorage(
+    createFileStorage: CreateFileStorage
+) {
     try {
-        const { body, type } = createFileStorage
+        const { body, type } = createFileStorage;
 
-        console.log("body", body)
-        console.log("type", type)
+        if (type === "repo") {
+            const repoDir = join(STORAGE_ROOT, body.id);
 
-        if (type === 'repo') {
-            const baseDir = join(process.cwd(), 'storage')
-            const repoDir = join(baseDir, body?.id)
+            await mkdir(repoDir, {
+                recursive: true,
+            });
 
-            await mkdir(repoDir, { recursive: true })
-
-            return repoDir
+            return repoDir;
         }
 
-        if (type === 'commit') {
-            const baseDir = join(process.cwd(), 'storage')
-            const repoDir = join(baseDir, body?.repoId)
-            const commitDir = join(repoDir, body?.id)
+        if (type === "commit") {
+            const commitDir = join(
+                STORAGE_ROOT,
+                body.repoId,
+                ".commits",
+                body.id
+            );
 
-            await mkdir(commitDir, { recursive: true })
+            await mkdir(commitDir, {
+                recursive: true,
+            });
 
-            return commitDir
+            return commitDir;
         }
 
-        return null
+        return null;
 
     } catch (error) {
-        console.log("error in createFileStorage", error)
-        throw error
+        console.log("error in createFileStorage", error);
+        throw error;
+    }
+}
+export async function storeSnapshots(
+    storeSnapshots: StoreSnapshots
+) {
+    try {
+
+        const { body, type, files } = storeSnapshots;
+
+        if (type === "commit") {
+
+            const commitDir = join(
+                STORAGE_ROOT,
+                body.repoId,
+                ".commits",
+                body.id
+            );
+
+            await mkdir(commitDir, {
+                recursive: true,
+            });
+
+            await writeFile(
+                join(commitDir, "snapshot.json"),
+                JSON.stringify(files, null, 2)
+            );
+
+            return commitDir;
+        }
+
+        return null;
+
+    } catch (error) {
+        console.log("error in storeSnapshots", error);
+        throw error;
     }
 }
 
-export async function storeSnapshots(storeSnapshots: StoreSnapshots) {
+export async function saveFile(
+    repoId: string,
+    filePath: string,
+    content: string
+) {
     try {
-        const { body, type, files } = storeSnapshots
 
-        console.log("body", body)   
-        console.log("type", type)
-        console.log("files", files)
+        const fullPath = join(
+            STORAGE_ROOT,
+            repoId,
+            filePath
+        );
 
-        if (type === 'commit') {
-            const baseDir = join(process.cwd(), 'storage')
-            const repoDir = join(baseDir, body?.repoId)
-            const commitDir = join(repoDir, body?.id)
+        const directory = dirname(fullPath);
 
-            await writeFile(join(commitDir, 'snapshot.json'), JSON.stringify(files))
-            return commitDir
-        }
+        await mkdir(directory, {
+            recursive: true,
+        });
 
-        return null
+        await writeFile(
+            fullPath,
+            content,
+            "utf-8"
+        );
+
+        return fullPath;
 
     } catch (error) {
-        console.log("error in createFileStorage", error)
-        throw error
+        console.log("error in saveFile", error);
+        throw error;
+    }
+}
+
+export async function getFileTree(dir: string) {
+    const entries = await readdir(dir, {
+        withFileTypes: true,
+    });
+    console.log("entries", entries)
+    return Promise.all(
+        entries.map(async (entry) => {
+            const fullPath = join(dir, entry.name);
+            console.log("fullPath", fullPath)
+            if (entry.isDirectory()) {
+                return {
+                    name: entry.name,
+                    type: 'folder',
+                    children: await getFileTree(fullPath),
+                };
+            }
+
+            return {
+                name: entry.name,
+                type: 'file',
+            };
+        })
+    );
+}
+
+export async function getFileContent(repoPath: string, filePath: string) {
+    try {
+        const fullPath = join(repoPath, filePath);
+        console.log("fullPath", fullPath)
+        const content = await readFileSync(fullPath, 'utf-8');
+        console.log("content", content)
+        return content;
+    } catch (error) {
+        console.log("error in getFileContent", error);
+        throw error;
     }
 }

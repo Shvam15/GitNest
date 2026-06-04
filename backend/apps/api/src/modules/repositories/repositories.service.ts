@@ -2,6 +2,7 @@ import { Injectable } from "@nestjs/common"
 import { CreateRepositoryDto } from "./dto/create-repo.dto"
 import { RepositoriesRepository } from "./repositories.repository"
 import { ApiResponse } from "src/common/responses/api-response"
+import { UpdateFileDto } from "./dto/update-file.dto"
 
 @Injectable()
 export class RepositoriesService {
@@ -45,5 +46,20 @@ export class RepositoriesService {
         }
 
         return new ApiResponse(true, 'Repository deleted successfully', null)
+    }
+
+    async updateFile(user: any, repoId: string, payload: UpdateFileDto) {
+        const updatedRepo = await this.repositoriesRepository.updateFile(user, repoId, payload)
+        return new ApiResponse(true, 'File updated successfully', updatedRepo)
+    }
+
+    async getRepositoryTree(user: any, repoId: string) {
+        const tree = await this.repositoriesRepository.getRepositoryTree(user, repoId)
+        return new ApiResponse(true, 'Repository tree fetched successfully', tree)
+    }
+
+    async getFileContent(user: any, repoId: string, filePath: string) {
+        const fileContent = await this.repositoriesRepository.getFileContent(user, repoId, filePath)
+        return new ApiResponse(true, 'File content fetched successfully', fileContent)
     }
 }

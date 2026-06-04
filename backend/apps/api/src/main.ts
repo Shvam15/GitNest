@@ -17,7 +17,10 @@ async function main() {
   }))
 
   // CORS
-  app.enableCors()
+  app.enableCors({
+    origin: "http://localhost:3000",
+    credentials: true,
+  })
 
   // prefix
   app.setGlobalPrefix('api')
